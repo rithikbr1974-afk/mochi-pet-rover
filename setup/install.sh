@@ -31,6 +31,10 @@ done
 # 3. hardware interfaces and Wi-Fi power saving (it drops SSH on the Pi 3)
 raspi-config nonint do_i2c 0 || true
 raspi-config nonint do_spi 0 || true
+# Wi-Fi country and audio: prepare_sd.ps1 sets these on the card, a pasted SD folder doesn't
+CC=$(grep -o 'regulatory-domain: *"[A-Z][A-Z]"' $BOOT/network-config 2>/dev/null | grep -o '[A-Z][A-Z]' | head -1)
+[ -n "$CC" ] && { raspi-config nonint do_wifi_country "$CC" || true; }
+grep -q '# --- mochi ---' $BOOT/config.txt || printf '\n[all]\n# --- mochi ---\ndtparam=i2c_arm=on\ndtparam=spi=on\ndtparam=audio=on\n' >> $BOOT/config.txt
 mkdir -p /etc/NetworkManager/conf.d
 printf '[connection]\nwifi.powersave = 2\n' > /etc/NetworkManager/conf.d/pet-wifi-powersave.conf
 grep -q 'act_led_trigger' $BOOT/config.txt || printf 'dtparam=act_led_trigger=heartbeat\n' >> $BOOT/config.txt

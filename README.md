@@ -166,6 +166,17 @@ It writes cloud-init files (hostname `mochi`, your login with the SSH key and no
 turns on I2C, SPI and audio, and copies the pet's code onto the card. Options: `-Drive F:`, `-Hostname`, `-User`,
 `-Country`, `-Timezone`.
 
+**No card yet?** Build a folder now and paste it onto the card later:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File setup\make_sd_folder.ps1 -Out D:\Mochi-SD-Card
+```
+
+The folder holds `pet`, `user-data`, `meta-data`, a `network-config` with placeholders, and a `README.txt` with the
+steps. Once the card is flashed (step 1), type your Wi-Fi into `network-config` with Notepad, then copy those four
+items onto the card's `bootfs` drive and replace the files it asks about. The first boot sets the Wi-Fi country, I2C,
+SPI and audio itself.
+
 ### 3. First boot
 
 Put the card in the Pi and power it from the power bank. The first boot installs everything by itself in about
@@ -355,7 +366,7 @@ pet/                   the Python package (runs on the Pi)
   bus.py               MQTT link (for later phases)
 web/                   the app's pages: index.html, style.css, app.js, eyes.js
 android/               the Android shell app and its build script (no Gradle)
-setup/                 prepare_sd.ps1, install.sh, services, find_pet.ps1, deploy.ps1
+setup/                 prepare_sd.ps1, make_sd_folder.ps1, install.sh, services, find_pet.ps1, deploy.ps1
 docs/                  HARDWARE.md, DESIGN.md
 ```
 
