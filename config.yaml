@@ -1,0 +1,56 @@
+# Mochi the pet rover: default settings. Design: docs/DESIGN.md
+# The phone app changes most of these; its changes live on the Pi in /var/lib/pet/settings.json.
+name: Mochi
+owner: Friend
+
+motors:
+  # BCM pins: [pwm/enable, forward, backward]. Works for TB6612FNG and L298N (ENA/IN1/IN2).
+  left: [12, 5, 6]
+  right: [13, 20, 21]
+  standby: 26          # TB6612 STBY; null for L298N
+  invert_left: false   # flip if a wheel turns the wrong way
+  invert_right: false
+  trim: 0.0            # -0.2..0.2: + slows the right wheel if it drives straighter that way
+  max_speed: 0.7       # TT motors on 2x18650 (7.4 V) must stay under ~0.8
+  min_speed: 0.35      # below this TT motors just hum; any non-zero command starts here
+  watchdog_s: 0.3      # no command for this long = stop
+  turn_180_s: 1.2      # time for a half turn on the spot at full speed (measure once; routes use it)
+
+sensors:               # set connected: true once each one is wired (phase 1)
+  ultrasonic: {connected: false, trigger: 23, echo: 24, stop_cm: 15}
+  cliff: {connected: false, pins: [16, 25], active_high: true}   # TCRT5000 DO: high = no floor (check yours)
+  touch: {connected: false, pin: 22}
+  tray: {connected: false, pin: 19, pull_up: true}   # microswitch under the tray to GND: pressed = item on it
+
+reserved_pins: [0, 1, 2, 3, 4, 7, 8, 9, 10, 11, 14, 15, 18]   # add-ons only (I2C, SPI, UART, 1-Wire, ID EEPROM)
+
+audio:
+  device: "plughw:CARD=Headphones"   # the Pi's 3.5 mm jack; "default" to use ALSA's default
+  volume: 0.8
+  pochi: true          # creature chirps on
+
+voice:                 # the girl's voice (Piper on the Pi)
+  enabled: true
+  model: en_US-amy-medium
+  pitch: 1.12          # 1.0 = natural; higher = cuter (tempo stays the same)
+  speed: 1.0
+
+camera:
+  url: ""              # the robot phone's IP Webcam address, e.g. http://192.168.1.50:8080
+
+tasks:
+  wait_load_s: 60
+  wait_take_s: 60
+  obstacle_wait_s: 15
+
+wifi:
+  hotspot_name: Mochi-setup
+  hotspot_password: mochipet   # change it in the app
+  fallback_s: 90
+
+web:
+  port: 8080
+
+mqtt:
+  host: localhost
+  port: 1883

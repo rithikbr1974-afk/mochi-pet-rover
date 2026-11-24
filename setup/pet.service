@@ -1,0 +1,25 @@
+[Unit]
+Description=Mochi the pet rover
+Wants=network-online.target
+After=network-online.target mosquitto.service sound.target
+
+[Service]
+User=pet
+Group=pet
+SupplementaryGroups=gpio i2c spi audio video
+WorkingDirectory=/opt/pet
+# the venv has Piper (the girl's voice) and sees the system packages; plain python3 if it's missing
+ExecStart=/bin/sh -c 'if [ -x /opt/pet-env/bin/python ]; then exec /opt/pet-env/bin/python -m pet.main; else exec /usr/bin/python3 -m pet.main; fi'
+Environment=PET_DATA=/var/lib/pet PYTHONUNBUFFERED=1
+# lgpio writes notify files in its working dir; /opt/pet is read-only to the pet
+Environment=LG_WD=/var/lib/pet
+Restart=always
+RestartSec=3
+NoNewPrivileges=yes
+ProtectSystem=strict
+ProtectHome=yes
+PrivateTmp=yes
+ReadWritePaths=/var/lib/pet
+
+[Install]
+WantedBy=multi-user.target

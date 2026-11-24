@@ -1,0 +1,15 @@
+[Unit]
+Description=Mochi first-boot install
+Wants=network-online.target
+After=network-online.target
+ConditionPathExists=!/var/lib/pet-installed
+
+[Service]
+Type=oneshot
+ExecStart=/bin/bash /boot/firmware/pet/setup/install.sh
+Restart=on-failure
+RestartSec=60
+TimeoutStartSec=3h
+
+[Install]
+WantedBy=multi-user.target

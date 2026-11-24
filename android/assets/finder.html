@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Mochi</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;1,400&family=Poppins:wght@400;500;600&display=swap">
+<style>
+  :root { --ink:#0e2e2a; --paper:#f2faf7; --mid:#9bbab2; --clay:#2ec4a6; --sun:#ffd166; --bg:var(--paper); --surface:#fff; --sunk:#e3f4ee;
+    --line:#d5ebe4; --line2:#bcdcd2; --text:var(--ink); --muted:#4a6862;
+    --ui:"Poppins", Arial, system-ui, sans-serif; --read:"Lora", Georgia, serif; color-scheme:light; }
+  @media (prefers-color-scheme: dark) { :root { --bg:#0b1f1c; --surface:#122a26; --sunk:#1a3531; --line:#1f3b36; --line2:#2c4d47;
+    --text:#e6f5f0; --muted:#9bbab2; color-scheme:dark; } }
+  * { box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  body { margin:0; min-height:100vh; color:var(--text); background:var(--bg); font:15px/1.5 var(--ui); padding:28px 16px; }
+  .wrap { max-width:480px; margin:auto; text-align:center; }
+  .face { position:relative; width:150px; height:96px; margin:34px auto 20px; animation:breathe 4.5s ease-in-out infinite; border-radius:40px; background:var(--clay); display:grid; place-items:center; }
+  .screen { width:118px; height:64px; border-radius:28px; background:var(--ink); display:flex; gap:22px; justify-content:center; align-items:center; }
+  .eye { width:22px; height:34px; border-radius:12px; background:var(--clay); animation:blink 4s infinite; }
+  .ear { position:absolute; top:-14px; width:34px; height:30px; background:var(--clay); border-radius:50% 50% 0 0 / 90% 90% 0 0; }
+  .ear.l { left:20px; transform:rotate(-12deg); } .ear.r { right:20px; transform:rotate(12deg); }
+  @keyframes breathe { 50% { transform:scale(1.015,.99); } }
+  @media (prefers-reduced-motion: reduce) { * { animation:none !important; } }
+  @keyframes blink { 0%,92%,100% { transform:scaleY(1); } 95% { transform:scaleY(.1); } }
+  h1 { margin:0 0 4px; font:600 24px/1.2 var(--ui); letter-spacing:-.2px; }
+  p { color:var(--muted); margin:4px 0 20px; font:italic 15px/1.4 var(--read); }
+  .card { text-align:left; background:var(--surface); border:1px solid var(--line); border-radius:26px; padding:18px; margin-bottom:12px;
+    box-shadow:0 1px 2px rgba(14,46,42,.06), 0 4px 16px rgba(14,46,42,.05); }
+  .label { font-weight:600; font-size:15px; }
+  .bot { display:flex; align-items:center; gap:10px; padding:12px 12px 12px 16px; border-radius:18px; background:var(--sunk); margin-top:8px; }
+  .bot b { flex:1; font-weight:600; } .bot small { color:var(--muted); display:block; font-weight:400; }
+  button { border:1px solid transparent; border-radius:99px; transition:transform .35s cubic-bezier(.34,1.56,.64,1); padding:11px 16px; font:600 15px var(--ui); color:#04241d; background:var(--clay); }
+  button.ghost { background:transparent; color:var(--text); border-color:var(--line2); font-weight:500; }
+  button:active { transform:scale(.93); transition-duration:.08s; }
+  input { width:100%; background:var(--bg); border:1px solid var(--line2); border-radius:16px; padding:11px 13px; color:var(--text); font:inherit; outline:none; }
+  input:focus { border-color:var(--clay); }
+  .row { display:flex; gap:8px; margin-top:10px; }
+  .hint { color:var(--muted); font:14px/1.5 var(--read); } .hint b { font-family:var(--ui); color:var(--text); }
+  .spin { display:inline-block; width:12px; height:12px; border-radius:50%; border:2px solid var(--line2); border-top-color:var(--clay); animation:r .9s linear infinite; vertical-align:-1px; margin-right:6px; }
+  @keyframes r { to { transform:rotate(360deg); } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="face"><i class="ear l"></i><i class="ear r"></i><div class="screen"><div class="eye"></div><div class="eye"></div></div></div>
+  <h1 id="title">Looking for Mochi…</h1>
+  <p id="sub"><span class="spin"></span>on this Wi-Fi</p>
+  <div class="card"><div class="label">Found</div><div id="found"><div class="hint" style="margin-top:6px">Nothing yet.</div></div></div>
+  <div class="card">
+    <div class="hint">In a new place? Mochi makes her own Wi-Fi called <b>Mochi-setup</b> when she can't find one she knows.
+      Join it from your phone's Wi-Fi settings, come back here, then add the place's Wi-Fi in her app.</div>
+    <div class="row"><button class="ghost" onclick="search()" style="flex:1">Search again</button></div>
+  </div>
+  <div class="card">
+    <div class="label">Or type her address</div>
+    <div class="row"><input id="addr" placeholder="192.168.1.23" inputmode="url"><button onclick="manual()">Open</button></div>
+  </div>
+</div>
+<script>
+const A = window.MochiApp;
+const seen = new Set();
+const lost = location.search.includes("lost"), again = location.search.includes("again");
+if (lost) { document.getElementById("title").textContent = "Lost Mochi"; }
+
+async function probe(url, auto) {
+  url = url.replace(/\/+$/, "");
+  if (!url || seen.has(url)) return;
+  seen.add(url);
+  try {
+    const ctl = new AbortController(); setTimeout(() => ctl.abort(), 2500);
+    const s = await (await fetch(url + "/api/status", { signal: ctl.signal })).json();
+    add(s.name || "Mochi", url, s);
+    if (auto && !again) open(url);
+  } catch (e) { seen.delete(url); }
+}
+function add(name, url, s) {
+  const f = document.getElementById("found");
+  if (f.querySelector(".hint")) f.innerHTML = "";
+  const d = document.createElement("div"); d.className = "bot";
+  const where = s && s.places && s.places.here ? " · in the " + s.places.here : "";
+  d.innerHTML = `<b></b><button>Open</button>`;
+  d.querySelector("b").textContent = name; const sm = document.createElement("small"); sm.textContent = url.replace("http://", "") + where;
+  d.querySelector("b").appendChild(sm);
+  d.querySelector("button").onclick = () => open(url);
+  f.appendChild(d);
+  document.getElementById("title").textContent = "Found " + name + "!";
+  document.getElementById("sub").textContent = "Tap Open to connect";
+}
+function open(url) { if (A) A.open(url); else location.href = url; }
+function manual() {
+  let v = document.getElementById("addr").value.trim(); if (!v) return;
+  if (!/^https?:\/\//.test(v)) v = "http://" + v; if (!/:\d+$/.test(v)) v += ":8080";
+  seen.delete(v); probe(v, true);
+}
+window.onRobot = (name, url) => probe(url, false);
+function search() {
+  seen.clear();
+  const last = A ? A.last() : "";
+  if (last) probe(last, !lost);                                  // the one used last time opens by itself
+  const gw = A ? A.gateway() : "";
+  if (gw) probe("http://" + gw + ":8080", true);                // her own hotspot: she is the gateway
+  probe("http://10.42.0.1:8080", true);
+  probe("http://mochi.local:8080", false);
+  if (A) A.discover();                                            // mDNS: _mochi._tcp
+}
+search();
+setInterval(() => { if (!document.querySelector(".bot")) search(); }, 8000);
+</script>
+</body>
+</html>

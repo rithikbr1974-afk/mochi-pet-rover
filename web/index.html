@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#f2faf7" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0b1f1c" media="(prefers-color-scheme: dark)">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;1,400&family=Poppins:wght@400;500;600&display=swap">
+<title>Mochi</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<main>
+  <header>
+    <div class="logo"><svg viewBox="0 0 24 24" fill="#04241d"><g class="blink"><ellipse cx="8" cy="11" rx="2.2" ry="3"/><ellipse cx="16" cy="11" rx="2.2" ry="3"/></g><path d="M8.5 16.5q3.5 2.5 7 0" stroke="#04241d" stroke-width="1.6" fill="none" stroke-linecap="round"/></svg></div>
+    <div><h1 id="name">Mochi</h1><div class="sub" id="sub">your little helper</div></div>
+    <div class="conn"><span class="dot" id="dot"></span><span id="connTxt">connecting</span></div>
+  </header>
+
+  <!-- HOME -->
+  <section class="tab on" id="t-home">
+    <div class="card headcard">
+      <div class="head" id="head"><i class="ear l"></i><i class="ear r"></i><div class="face"><canvas id="eyes"></canvas><span class="mood" id="mood">neutral</span><span class="where" id="where"></span></div></div>
+      <div class="bubble" id="bubble"></div>
+    </div>
+    <div class="card task" id="taskCard" hidden>
+      <h2><span class="spin"></span> Doing a task <span class="right"><button class="small danger" data-act="taskCancel">Stop</button></span></h2>
+      <div class="hint" id="taskText"></div>
+      <div class="step" id="taskStep"></div>
+      <button class="primary" id="loadedBtn" data-act="taskConfirm" hidden style="width:100%">It's on the tray / done ✓</button>
+    </div>
+    <div class="card">
+      <h2>Ask her</h2>
+      <div class="ask">
+        <input type="text" id="askIn" placeholder="Bring my remote from the bedroom" enterkeyhint="send">
+        <button class="mic" id="micBtn" title="Speak"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg></button>
+        <button class="primary" data-act="ask">Go</button>
+      </div>
+      <div class="chips" style="margin-top:10px" id="examples"></div>
+    </div>
+    <div class="card">
+      <h2>Feelings</h2>
+      <div class="grid3" id="moves"></div>
+    </div>
+    <div class="card">
+      <h2>Make her say</h2>
+      <div class="ask"><input type="text" id="sayIn" placeholder="Good morning!" enterkeyhint="send"><button data-act="say">Say</button></div>
+    </div>
+    <div class="card">
+      <h2>Status</h2>
+      <div class="chips" id="chips"></div>
+    </div>
+  </section>
+
+  <!-- DRIVE -->
+  <section class="tab" id="t-drive">
+    <div class="card teach" id="teachCard" hidden>
+      <h2>Teaching a route</h2>
+      <div class="step" id="teachTxt"></div>
+      <div class="hint" style="margin-bottom:10px">Drive her there slowly and simply. Tap Arrived when she's there.</div>
+      <div class="grid2"><button class="primary" data-act="teachFinish">Arrived ✓</button><button class="ghost" data-act="teachCancel">Cancel</button></div>
+    </div>
+    <div class="card" style="padding:10px"><div class="cam" id="cam">Camera off.<br>Set the robot phone's address in Settings → Camera.</div></div>
+    <div class="card">
+      <div class="pad" id="pad"><div class="knob" id="knob"></div></div>
+      <div class="row"><span class="hint">Speed</span><input class="grow" type="range" id="speed" min="0.3" max="1" step="0.05" value="0.8"><span class="hint" id="speedVal">80%</span></div>
+      <button class="danger" data-act="stop" style="width:100%;margin-top:12px">STOP</button>
+    </div>
+  </section>
+
+  <!-- PLACES & TASKS -->
+  <section class="tab" id="t-places">
+    <div class="card">
+      <h2>Where are we</h2>
+      <label class="field">Mochi is in</label><select id="hereSel"></select>
+      <label class="field">You are in</label><select id="ownerSel"></select>
+    </div>
+    <div class="card">
+      <h2>Teach her the way</h2>
+      <div class="hint">From where she is now to another place. Routes work both ways and join up (living room → hall → bedroom).</div>
+      <div class="row" style="margin-top:10px"><select class="grow" id="teachTo"></select><input class="grow" type="text" id="teachNew" placeholder="or a new place"></div>
+      <button class="primary" data-act="teachStart" style="width:100%;margin-top:10px">Start teaching</button>
+    </div>
+    <div class="card"><h2>Places <span class="right"><button class="small" data-act="addPlace">+ Add</button></span></h2><div class="list" id="placeList"></div></div>
+    <div class="card"><h2>Routes</h2><div class="list" id="routeList"></div></div>
+    <div class="card"><h2>Recent tasks</h2><div class="list" id="histList"></div></div>
+  </section>
+
+  <!-- WIFI -->
+  <section class="tab" id="t-wifi">
+    <div class="card">
+      <h2>Connected</h2>
+      <div class="row"><div class="grow"><div id="wifiCur" style="font-size:17px">-</div><div class="hint" id="wifiInfo"></div></div>
+        <label class="switch" title="Her own hotspot"><input type="checkbox" id="hotspotSw"><span></span></label></div>
+      <div class="hint" id="wifiNote" style="margin-top:8px"></div>
+    </div>
+    <div class="card"><h2>Saved networks</h2><div class="list" id="wifiList"></div>
+      <div class="hint" style="margin-top:8px">She joins the strongest saved network she can see. Higher priority wins when several are in range.</div></div>
+    <div class="card">
+      <h2>Add a network <span class="right"><button class="small" data-act="scan">Scan nearby</button></span></h2>
+      <div class="list" id="scanList" style="margin-bottom:6px"></div>
+      <label class="field">Network name</label><input type="text" id="wSsid" autocomplete="off">
+      <label class="field">Password</label><input type="password" id="wPass" autocomplete="new-password">
+      <label class="field">Priority (higher = preferred)</label><input type="number" id="wPrio" value="0" min="0" max="100">
+      <button class="primary" data-act="wifiAdd" style="width:100%;margin-top:12px">Save network</button>
+      <div class="hint" style="margin-top:8px">2.4 GHz only (the Pi 3 can't see 5 GHz). Passwords stay on Mochi and are never shown again.</div>
+    </div>
+  </section>
+
+  <!-- SETTINGS -->
+  <section class="tab" id="t-set">
+    <div id="setForm"></div>
+    <div class="grid2" style="margin-bottom:12px"><button class="primary" data-act="saveSet">Save settings</button><button class="ghost" data-act="restart">Restart Mochi</button></div>
+    <div class="card"><h2>App</h2><div class="hint" id="appInfo"></div>
+      <button class="ghost small" id="findBtn" style="margin-top:8px" hidden>Find another Mochi</button></div>
+  </section>
+</main>
+
+<nav><div class="bar">
+  <button class="on" data-tab="home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><circle cx="9" cy="10.5" r="1.3" fill="currentColor"/><circle cx="15" cy="10.5" r="1.3" fill="currentColor"/><path d="M9 15q3 2 6 0"/></svg>Home</button>
+  <button data-tab="drive"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3"/><path d="M12 3v4M12 17v4M3 12h4M17 12h4"/></svg>Drive</button>
+  <button data-tab="places"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/></svg>Places</button>
+  <button data-tab="wifi"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M2.5 9a14 14 0 0 1 19 0M5.5 12.5a9.5 9.5 0 0 1 13 0M8.5 16a5 5 0 0 1 7 0"/><circle cx="12" cy="19.5" r="1" fill="currentColor"/></svg>Wi-Fi</button>
+  <button data-tab="set"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg>Settings</button>
+</div></nav>
+<div class="toast" id="toast"></div>
+<script src="eyes.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
